@@ -103,6 +103,22 @@ describe('PostCardComponent', () => {
     expect(el.textContent).toContain(payload);
   });
 
+  it('still renders a script tag as literal text in dark mode (09 AC15)', async () => {
+    // Escaping is a property of interpolation and cannot vary by theme, so this can only ever
+    // agree with the two tests above — it exists because AC15 asks for the check "in both
+    // themes" explicitly, and a reader should not have to re-derive that it is theme-independent.
+    document.documentElement.setAttribute('data-theme', 'dark');
+    try {
+      const payload = '<script>alert(1)</script>';
+      const el = await render(post({ message: payload }));
+
+      expect(el.querySelector('script')).toBeNull();
+      expect(el.textContent).toContain(payload);
+    } finally {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  });
+
   it('shows the admin answer editor only when admin is true', async () => {
     const publicCard = await render(post());
     expect(publicCard.querySelector('app-answer-editor')).toBeNull();

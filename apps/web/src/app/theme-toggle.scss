@@ -1,0 +1,53 @@
+:host {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--wall-hairline);
+  background: var(--wall-surface);
+  color: var(--wall-ink);
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    transform 150ms ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wall-accent);
+    outline-offset: 2px;
+  }
+}
+
+.theme-toggle__icon {
+  width: 20px;
+  height: 20px;
+  // Re-plays on every toggle: `@if`/`@else` in the template removes and re-inserts the icon
+  // element rather than mutating it in place, so a plain animation (not a transition, which
+  // needs an existing element to interpolate from) fires fresh each time.
+  animation: theme-toggle-pop 220ms ease;
+}
+
+@keyframes theme-toggle-pop {
+  from {
+    transform: scale(0.6) rotate(-40deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}

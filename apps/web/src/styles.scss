@@ -19,6 +19,29 @@
   --wall-radius: 12px;
   --wall-font-serif: 'Source Serif 4', Georgia, serif;
   --wall-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+
+// Dark tokens (DESIGN.md's surface-dark / on-dark / accent-amber), the same values the Day 1
+// deck's `.slide.dark` already renders with — the wall and the course materials agree. Coral
+// becomes amber: coral on near-black is ~4.7:1, marginal for small text (docs/specs/09-dark-mode.md).
+// Set on <html> — by the boot script in index.html on first paint (see ThemeService for why that
+// can't wait for Angular to bootstrap) and by ThemeService afterwards.
+//
+// This block MUST be render-blocking, which is why `angular.json` sets
+// `optimization.styles.inlineCritical: false` for production. With Angular's default
+// (`inlineCritical: true`) the light `:root` above is inlined into index.html as critical CSS
+// while this block is left in the async-loaded stylesheet — so a dark-preference browser paints
+// once in light and then flips, which is precisely the flash AC8 forbids. It reproduces only in
+// a production build, so no dev-server test can catch it.
+:root[data-theme='dark'] {
+  --wall-bg: #181715;
+  --wall-surface: #252320;
+  --wall-ink: #faf9f5;
+  --wall-muted: #a09d96;
+  --wall-hairline: #3a3733;
+  --wall-accent: #e8a55a;
+  color-scheme: dark;
 }
 
 html {
@@ -36,14 +59,17 @@ html {
 }
 
 body {
-  // The app commits to one look (§4: warm, editorial, calm) rather than following the
-  // viewer's system theme.
-  color-scheme: light;
-
+  // Themeable rather than the single fixed look this comment used to describe (§4 is still the
+  // *light* palette) — see docs/specs/09-dark-mode.md: the wall now follows the viewer's device
+  // on first visit and remembers an explicit toggle choice after that. `color-scheme` lives on
+  // the `:root` blocks above, where it flips together with the rest of the theme tokens.
   background-color: var(--wall-bg);
   color: var(--wall-ink);
   font-family: var(--wall-font-sans);
   line-height: 1.5;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
 
   // Reset the user agent margin.
   margin: 0;
