@@ -13,6 +13,30 @@
       rel="stylesheet"
     />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script>
+      // Sets data-theme on <html> before first paint, so a dark-preference browser never
+      // flashes light (docs/specs/09-dark-mode.md AC8) — this can't wait for Angular to boot.
+      // A classic inline script blocks parsing until it runs, which is exactly what makes that
+      // possible here. The storage key and the light/dark allowlist below are a hand-kept copy
+      // of src/app/theme.ts — nothing here can import from it, so a type error will never catch
+      // them drifting apart. e2e/dark-mode.spec.ts does: it blocks the Angular bundle entirely
+      // and asserts this script alone still themes the page.
+      (function () {
+        try {
+          var stored = localStorage.getItem('wall-theme');
+          var dark =
+            stored === 'dark' ||
+            (stored !== 'light' &&
+              window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {
+          // localStorage/matchMedia unavailable (private browsing, old browser) — light default.
+        }
+      })();
+    </script>
   </head>
   <body>
     <app-root></app-root>

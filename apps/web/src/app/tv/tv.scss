@@ -1,8 +1,10 @@
 :host {
-  // TV-scoped design tokens (DESIGN.md). Custom properties cascade through the DOM regardless
-  // of component boundaries, so redeclaring the app's --wall-* names here recolors every
-  // <app-post-card> under this host without touching the :root definitions in styles.scss —
-  // /, /post and /admin keep their current look.
+  // TV-scoped design tokens (DESIGN.md's light values) — /tv has always had its own light
+  // palette, distinct from :root's spec §4 values; that divergence predates dark mode and is
+  // preserved rather than resolved here (see docs/specs/09-dark-mode-plan.md). Custom
+  // properties cascade through the DOM regardless of component boundaries, so redeclaring the
+  // app's --wall-* names here recolors every <app-post-card> under this host without touching
+  // the :root definitions in styles.scss — /, /post and /admin keep their own look.
   --wall-bg: #faf9f5;
   --wall-surface: #efe9de;
   --wall-ink: #141413;
@@ -17,9 +19,26 @@
   min-height: 100vh;
   box-sizing: border-box;
   padding: 3rem;
-  background: var(--tv-bg);
-  color: var(--tv-ink);
+  background: var(--wall-bg);
+  color: var(--wall-ink);
   overflow: hidden;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+// /tv's own dark palette (same source as :root[data-theme='dark'] in styles.scss). Reached via
+// :host-context() rather than a plain :root[data-theme='dark'] :host rule — :host cannot be the
+// target of a descendant combinator, only composed via :host()/:host-context() (docs/specs/
+// 09-dark-mode-plan.md). --tv-qr-* stays fixed in both themes: the QR box is already a dark
+// square with light modules, chosen for scanner contrast, not to match the page.
+:host-context([data-theme='dark']) {
+  --wall-bg: #181715;
+  --wall-surface: #252320;
+  --wall-ink: #faf9f5;
+  --wall-muted: #a09d96;
+  --wall-hairline: #3a3733;
+  --wall-accent: #e8a55a;
 }
 
 .tv-prompt {

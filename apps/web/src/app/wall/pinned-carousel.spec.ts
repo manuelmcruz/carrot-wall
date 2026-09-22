@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 
+import { ThemeService } from '../theme';
 import { PinnedCarouselComponent } from './pinned-carousel';
 import { Post } from './wall.models';
 
@@ -140,6 +141,38 @@ describe('PinnedCarouselComponent', () => {
     fixture.detectChanges();
 
     expect(el.textContent).toContain('Post 4');
+  });
+
+  it('toggling the theme neither resets the page nor restarts the page-turn beat (09 AC14)', () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = render(posts(5));
+      const el = fixture.nativeElement as HTMLElement;
+
+      // t=6000: the first page turn lands on page 2.
+      vi.advanceTimersByTime(6000);
+      fixture.detectChanges();
+      expect(el.textContent).toContain('Post 4');
+
+      // t=9000: halfway through the next 6s beat — deliberately mid-cycle, because that is
+      // where a restarted interval hides. ThemeService lives outside this component's inputs
+      // and injector chain entirely, so a theme switch must not touch either piece of state.
+      vi.advanceTimersByTime(3000);
+      TestBed.inject(ThemeService).toggle();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.currentPage()).toBe(1);
+      expect(el.textContent).toContain('Post 4');
+
+      // t=12000: the beat set up at t=6000 fires here and wraps back to page 1. Had the toggle
+      // restarted the interval at t=9000, the next turn would not be due until t=15000 and this
+      // would still read 'Post 4' — which is the failure this test exists to catch.
+      vi.advanceTimersByTime(3000);
+      fixture.detectChanges();
+      expect(el.textContent).toContain('Post 1');
+      expect(el.textContent).not.toContain('Post 4');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('clamps back onto a valid page when the input shrinks below the current page index', () => {
