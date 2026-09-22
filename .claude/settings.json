@@ -1,4 +1,17 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw test *)",
+      "Bash(npm test *)",
+      "Bash(git status)",
+      "Bash(git diff *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/*.pem)"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {
@@ -9,6 +22,18 @@
             "command": "f=$(python3 -c 'import json,sys;print(json.load(sys.stdin).get(\"tool_input\",{}).get(\"file_path\",\"\"))'); case \"$f\" in *.ts|*.html|*.scss|*.json) (cd apps/web && npx prettier --write \"$f\") >/dev/null 2>&1 || true;; esac"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [ { "type": "command",
+          "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block_destructive_bash.sh",
+          "timeout": 10 } ]
+      },
+      {
+        "matcher": "Read|Edit|Write",
+        "hooks": [ { "type": "command",
+          "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block_secrets_access.sh",
+          "timeout": 10 } ]
       }
     ],
     "PreToolUse": [
@@ -20,6 +45,18 @@
             "command": "f=$(python3 -c 'import json,sys;print(json.load(sys.stdin).get(\"tool_input\",{}).get(\"file_path\",\"\"))'); case \"$f\" in */db/migration/V*) if [ -e \"$f\" ]; then echo 'Existing migrations are immutable. Create a new versioned file instead.' >&2; exit 2; fi;; esac"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [ { "type": "command",
+          "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block_destructive_bash.sh",
+          "timeout": 10 } ]
+      },
+      {
+        "matcher": "Read|Edit|Write",
+        "hooks": [ { "type": "command",
+          "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block_secrets_access.sh",
+          "timeout": 10 } ]
       }
     ]
   }
